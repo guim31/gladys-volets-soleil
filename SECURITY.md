@@ -30,6 +30,12 @@ Gladys before reporting a problem.
 
 In scope: the code of this repository and the Docker image it publishes.
 
+The integration computes everything locally and makes no network request
+besides its connection to Gladys. It reads the coordinates of the houses
+configured in Gladys (`location` permission) and keeps them in memory only.
+It stores one file in `/data`, `state.json`: the season forced by a scene or
+the widget, and the arrival triggers already fired over the last three days.
+It holds no secret and logs neither the coordinates nor any token.
+
 Out of scope: Gladys Assistant itself (see its
-[security policy](https://github.com/GladysAssistant/Gladys/security/policy)),
-and the third-party services and devices the integration talks to.
+[security policy](https://github.com/GladysAssistant/Gladys/security/policy)).
