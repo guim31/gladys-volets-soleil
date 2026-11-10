@@ -31,15 +31,17 @@ pushing.
 ## Architecture
 
 ```
-index.js                          SDK wiring only: handlers registered before connect()
-src/devices/index.js              registry of the device blueprints + dispatch helpers
-src/devices/<type>.js             one device type per file (buildDevice, onPoll, onSetValue...)
-src/scenes.js                     scene action handlers (manifest `scene_actions`)
-src/widgets.js                    dashboard widget handlers (manifest `widgets`)
+index.js                          SDK wiring only: createApp(gladys), then connect()
+src/app.js                        every SDK handler + the minute loop (states, trigger, widget, actions)
+src/sun.js                        position of the Sun (NOAA algorithm), pure
+src/advice.js                     facade geometry, advised closure, season, 48 h timeline
+src/devices.js                    one Gladys device per facade, its states
+src/widget.js                     dashboard widget "facades"
+src/i18n.js                       names and texts in en/fr/de/es, local time formatting
+src/store.js                      /data/state.json (forced season, fired triggers)
 src/config.js                     DEFAULT_CONFIG (mirrors the manifest defaults) + normalization
-src/weather.js                    example driver (Open-Meteo)
 gladys-assistant-integration.json manifest: name, config_schema, actions, image...
-docs/en.md, docs/fr.md            user documentation, re-hosted by Gladys (mandatory)
+docs/{en,fr,de,es}.md             user documentation, re-hosted by Gladys (mandatory)
 test/                             node --test, against the SDK's fake Gladys (integration-sdk/testing)
 .github/scripts/release.mjs       release helpers (manifest bump, changelog), tested in test/
 ```
@@ -251,3 +253,21 @@ long, et sur un « Sie »/« Ihr… » de politesse en allemand. Le store exige 
 - Docs `en`, `fr`, `de`, `es` avec les mêmes sections.
 - Chauffe, ouverture, sécurité : ne rien rendre pilotable « comme un thermostat » ou par un assistant
   vocal quand une erreur serait dangereuse (leçon d'OctoPrint).
+
+## Volets & Soleil (cette intégration)
+
+- **Calcul local** : algorithme NOAA (`src/sun.js`), écart < 0,02° avec astronomy-engine au-dessus de l'horizon
+  (`test/fixtures/sun-reference.json`, produit une fois, astronomy-engine n'est pas une dépendance). Sous
+  l'horizon, les modèles de réfraction divergent : sans effet, rien n'en dépend.
+- **Identifiants** : un appareil par emplacement de façade (`facade_1` … `facade_6` →
+  `externalIds('facade', 'slot-N')`). Le nom et l'orientation peuvent changer sans orphelin ; changer
+  d'emplacement crée un autre appareil.
+- **Pas de lecture d'un autre appareil** : le SDK ne lit pas les états des autres intégrations ; la température
+  extérieure passe par l'action de scène `set_season` (choix gardé dans `/data/state.json`).
+- **Pourcentage** : pas de couple « pourcentage générique » dans le cœur. `light-sensor/decimal` + `percent`
+  (comme gladys-astronomy) ; deux fonctionnalités de ce couple sur l'appareil (fermeture, ensoleillement), donc
+  le tableau de bord affiche leurs noms, pas « Luminosité décimale ». `shutter/position` écarté : il se piloterait.
+- **Déclencheur `sun_arrival`** : le champ `lead` est **requis** (sinon une scène sans filtre partirait quatre
+  fois). Un événement par (façade, arrivée, avance), clés retenues trois jours dans `/data` : un redémarrage ne
+  redéclenche rien. Fenêtre de rattrapage 3 min.
+- **Chronologie** : balayage par pas de 5 min sur 48 h, affiné à la minute ; ~1 ms par façade et par minute.

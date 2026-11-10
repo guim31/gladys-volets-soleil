@@ -1,176 +1,1105 @@
 {
   "manifest_version": 1,
   "type": "device",
-  "name": "Demo Devices Template",
+  "name": "Volets & Soleil",
   "description": {
-    "en": "Starter template showing sensors, a switch, a dimmable light and a smart plug.",
-    "fr": "Template de démarrage : capteurs, interrupteur, lampe variable et prise connectée."
+    "en": "Advised shutter closure per facade, from the sun position. Local, no account.",
+    "fr": "Fermeture conseillée des volets par façade, d'après la position du soleil. Local, sans compte.",
+    "de": "Empfohlene Rollladenschließung pro Fassade nach dem Sonnenstand. Lokal, ohne Konto.",
+    "es": "Cierre aconsejado de las persianas por fachada según la posición del sol. Local, sin cuenta."
   },
   "version": "1.0.0",
-  "docker_image": "ghcr.io/gladysassistant/integration-template-js:1.0.0",
+  "docker_image": "ghcr.io/guim31/gladys-volets-soleil:1.0.0",
   "gladys_version": ">=5.1.0",
-  "cover_image": "https://raw.githubusercontent.com/GladysAssistant/integration-template-js/master/cover.png",
-  "categories": ["lighting", "security", "environment"],
-  "transports": ["local", "cloud"],
+  "cover_image": "https://raw.githubusercontent.com/guim31/gladys-volets-soleil/main/cover.png",
+  "categories": ["climate", "environment"],
+  "transports": ["local"],
+  "location": true,
   "config_schema": [
     {
       "key": "intro",
       "type": "section",
-      "label": { "en": "Getting started", "fr": "Pour commencer" },
-      "description": {
-        "en": "The demo weather station reads real data from the free Open-Meteo API: pick the coordinates to observe. No account, no API key.",
-        "fr": "La station météo de démonstration lit de vraies données via l'API gratuite Open-Meteo : choisissez les coordonnées à observer. Pas de compte, pas de clé d'API."
+      "label": {
+        "en": "How it works",
+        "fr": "Fonctionnement",
+        "de": "So funktioniert es",
+        "es": "Funcionamiento"
       },
-      "links": [
+      "description": {
+        "en": "The sun position is computed locally from the location of your house in Gladys. Describe each facade below: one device per facade, with the advised shutter closure.",
+        "fr": "La position du soleil est calculée localement d'après la position de votre maison dans Gladys. Décrivez chaque façade ci-dessous : un appareil par façade, avec la fermeture conseillée des volets.",
+        "de": "Der Sonnenstand wird lokal aus dem Standort deines Hauses in Gladys berechnet. Beschreibe unten jede Fassade: ein Gerät pro Fassade, mit der empfohlenen Schließung der Rollläden.",
+        "es": "La posición del sol se calcula localmente a partir de la ubicación de su casa en Gladys. Describa cada fachada a continuación: un dispositivo por fachada, con el cierre aconsejado de las persianas."
+      }
+    },
+    {
+      "key": "language",
+      "type": "select",
+      "label": {
+        "en": "Language of names and texts",
+        "fr": "Langue des noms et des textes",
+        "de": "Sprache der Namen und Texte",
+        "es": "Idioma de los nombres y textos"
+      },
+      "required": false,
+      "default": "fr",
+      "options": [
         {
-          "url": "https://open-meteo.com/en/docs",
-          "label": { "en": "Open-Meteo documentation", "fr": "Documentation Open-Meteo" }
+          "value": "en",
+          "label": {
+            "en": "English",
+            "fr": "Anglais",
+            "de": "Englisch",
+            "es": "Inglés"
+          }
+        },
+        {
+          "value": "fr",
+          "label": {
+            "en": "French",
+            "fr": "Français",
+            "de": "Französisch",
+            "es": "Francés"
+          }
+        },
+        {
+          "value": "de",
+          "label": {
+            "en": "German",
+            "fr": "Allemand",
+            "de": "Deutsch",
+            "es": "Alemán"
+          }
+        },
+        {
+          "value": "es",
+          "label": {
+            "en": "Spanish",
+            "fr": "Espagnol",
+            "de": "Spanisch",
+            "es": "Español"
+          }
         }
       ]
     },
     {
-      "key": "latitude",
-      "type": "number",
-      "label": { "en": "Latitude", "fr": "Latitude" },
-      "description": {
-        "en": "Latitude used for the demo weather sensor.",
-        "fr": "Latitude utilisée par le capteur météo de démonstration."
-      },
-      "placeholder": { "en": "e.g. 48.8566", "fr": "ex. 48.8566" },
-      "required": true,
-      "default": 48.8566,
-      "min": -90,
-      "max": 90
-    },
-    {
-      "key": "longitude",
-      "type": "number",
-      "label": { "en": "Longitude", "fr": "Longitude" },
-      "description": {
-        "en": "Longitude used for the demo weather sensor.",
-        "fr": "Longitude utilisée par le capteur météo de démonstration."
-      },
-      "placeholder": { "en": "e.g. 2.3522", "fr": "ex. 2.3522" },
-      "required": true,
-      "default": 2.3522,
-      "min": -180,
-      "max": 180
-    },
-    {
-      "key": "unit",
+      "key": "mode",
       "type": "select",
-      "label": { "en": "Temperature unit", "fr": "Unité de température" },
+      "label": {
+        "en": "Season",
+        "fr": "Saison",
+        "de": "Jahreszeit",
+        "es": "Estación"
+      },
+      "description": {
+        "en": "Summer: close to keep the house cool. Winter: always 0 % to let the sun in. Automatic: summer during the months below. A scene or the widget can force the season.",
+        "fr": "Été : fermer pour garder la maison au frais. Hiver : toujours 0 % pour laisser entrer le soleil. Automatique : été pendant les mois ci-dessous. Une scène ou le widget peut imposer la saison.",
+        "de": "Sommer: schließen, damit das Haus kühl bleibt. Winter: immer 0 %, um die Sonne hereinzulassen. Automatisch: Sommer in den Monaten unten. Eine Szene oder das Widget kann die Jahreszeit erzwingen.",
+        "es": "Verano: cerrar para mantener la casa fresca. Invierno: siempre 0 % para dejar entrar el sol. Automático: verano durante los meses indicados abajo. Una escena o el widget puede imponer la estación."
+      },
       "required": false,
-      "default": "celsius",
+      "default": "auto",
       "options": [
-        { "value": "celsius", "label": { "en": "Celsius", "fr": "Celsius" } },
-        { "value": "fahrenheit", "label": { "en": "Fahrenheit", "fr": "Fahrenheit" } }
+        {
+          "value": "auto",
+          "label": {
+            "en": "Automatic (months)",
+            "fr": "Automatique (mois)",
+            "de": "Automatisch (Monate)",
+            "es": "Automático (meses)"
+          }
+        },
+        {
+          "value": "summer",
+          "label": {
+            "en": "Always summer",
+            "fr": "Toujours été",
+            "de": "Immer Sommer",
+            "es": "Siempre verano"
+          }
+        },
+        {
+          "value": "winter",
+          "label": {
+            "en": "Always winter",
+            "fr": "Toujours hiver",
+            "de": "Immer Winter",
+            "es": "Siempre invierno"
+          }
+        }
       ]
     },
     {
-      "key": "poll_frequency",
-      "type": "number",
-      "label": { "en": "Refresh interval (s)", "fr": "Intervalle de rafraîchissement (s)" },
-      "description": {
-        "en": "How often sensors are polled, in seconds (one minute minimum).",
-        "fr": "Fréquence d'interrogation des capteurs, en secondes (une minute minimum)."
+      "key": "summer_start_month",
+      "type": "select",
+      "label": {
+        "en": "Summer starts in",
+        "fr": "L'été commence en",
+        "de": "Sommer beginnt im",
+        "es": "El verano empieza en"
       },
       "required": false,
-      "default": 300,
-      "min": 60,
-      "max": 3600
+      "default": "5",
+      "options": [
+        {
+          "value": "1",
+          "label": {
+            "en": "January",
+            "fr": "Janvier",
+            "de": "Januar",
+            "es": "Enero"
+          }
+        },
+        {
+          "value": "2",
+          "label": {
+            "en": "February",
+            "fr": "Février",
+            "de": "Februar",
+            "es": "Febrero"
+          }
+        },
+        {
+          "value": "3",
+          "label": {
+            "en": "March",
+            "fr": "Mars",
+            "de": "März",
+            "es": "Marzo"
+          }
+        },
+        {
+          "value": "4",
+          "label": {
+            "en": "April",
+            "fr": "Avril",
+            "de": "April",
+            "es": "Abril"
+          }
+        },
+        {
+          "value": "5",
+          "label": {
+            "en": "May",
+            "fr": "Mai",
+            "de": "Mai",
+            "es": "Mayo"
+          }
+        },
+        {
+          "value": "6",
+          "label": {
+            "en": "June",
+            "fr": "Juin",
+            "de": "Juni",
+            "es": "Junio"
+          }
+        },
+        {
+          "value": "7",
+          "label": {
+            "en": "July",
+            "fr": "Juillet",
+            "de": "Juli",
+            "es": "Julio"
+          }
+        },
+        {
+          "value": "8",
+          "label": {
+            "en": "August",
+            "fr": "Août",
+            "de": "August",
+            "es": "Agosto"
+          }
+        },
+        {
+          "value": "9",
+          "label": {
+            "en": "September",
+            "fr": "Septembre",
+            "de": "September",
+            "es": "Septiembre"
+          }
+        },
+        {
+          "value": "10",
+          "label": {
+            "en": "October",
+            "fr": "Octobre",
+            "de": "Oktober",
+            "es": "Octubre"
+          }
+        },
+        {
+          "value": "11",
+          "label": {
+            "en": "November",
+            "fr": "Novembre",
+            "de": "November",
+            "es": "Noviembre"
+          }
+        },
+        {
+          "value": "12",
+          "label": {
+            "en": "December",
+            "fr": "Décembre",
+            "de": "Dezember",
+            "es": "Diciembre"
+          }
+        }
+      ]
+    },
+    {
+      "key": "summer_end_month",
+      "type": "select",
+      "label": {
+        "en": "Summer ends after",
+        "fr": "L'été finit après",
+        "de": "Sommer endet nach",
+        "es": "El verano termina después de"
+      },
+      "required": false,
+      "default": "9",
+      "options": [
+        {
+          "value": "1",
+          "label": {
+            "en": "January",
+            "fr": "Janvier",
+            "de": "Januar",
+            "es": "Enero"
+          }
+        },
+        {
+          "value": "2",
+          "label": {
+            "en": "February",
+            "fr": "Février",
+            "de": "Februar",
+            "es": "Febrero"
+          }
+        },
+        {
+          "value": "3",
+          "label": {
+            "en": "March",
+            "fr": "Mars",
+            "de": "März",
+            "es": "Marzo"
+          }
+        },
+        {
+          "value": "4",
+          "label": {
+            "en": "April",
+            "fr": "Avril",
+            "de": "April",
+            "es": "Abril"
+          }
+        },
+        {
+          "value": "5",
+          "label": {
+            "en": "May",
+            "fr": "Mai",
+            "de": "Mai",
+            "es": "Mayo"
+          }
+        },
+        {
+          "value": "6",
+          "label": {
+            "en": "June",
+            "fr": "Juin",
+            "de": "Juni",
+            "es": "Junio"
+          }
+        },
+        {
+          "value": "7",
+          "label": {
+            "en": "July",
+            "fr": "Juillet",
+            "de": "Juli",
+            "es": "Julio"
+          }
+        },
+        {
+          "value": "8",
+          "label": {
+            "en": "August",
+            "fr": "Août",
+            "de": "August",
+            "es": "Agosto"
+          }
+        },
+        {
+          "value": "9",
+          "label": {
+            "en": "September",
+            "fr": "Septembre",
+            "de": "September",
+            "es": "Septiembre"
+          }
+        },
+        {
+          "value": "10",
+          "label": {
+            "en": "October",
+            "fr": "Octobre",
+            "de": "Oktober",
+            "es": "Octubre"
+          }
+        },
+        {
+          "value": "11",
+          "label": {
+            "en": "November",
+            "fr": "Novembre",
+            "de": "November",
+            "es": "Noviembre"
+          }
+        },
+        {
+          "value": "12",
+          "label": {
+            "en": "December",
+            "fr": "Décembre",
+            "de": "Dezember",
+            "es": "Diciembre"
+          }
+        }
+      ]
+    },
+    {
+      "key": "min_elevation",
+      "type": "number",
+      "label": {
+        "en": "Minimum sun elevation (°)",
+        "fr": "Élévation minimale du soleil (°)",
+        "de": "Mindesthöhe der Sonne (°)",
+        "es": "Elevación mínima del sol (°)"
+      },
+      "description": {
+        "en": "Below this height above the horizon, the sun is ignored (trees, neighbours).",
+        "fr": "En dessous de cette hauteur au-dessus de l'horizon, le soleil est ignoré (arbres, voisins).",
+        "de": "Unter dieser Höhe über dem Horizont wird die Sonne ignoriert (Bäume, Nachbarn).",
+        "es": "Por debajo de esta altura sobre el horizonte, el sol se ignora (árboles, vecinos)."
+      },
+      "required": false,
+      "default": 5,
+      "min": 0,
+      "max": 45
+    },
+    {
+      "key": "facade_1",
+      "type": "section",
+      "label": {
+        "en": "Facade 1",
+        "fr": "Façade 1",
+        "de": "Fassade 1",
+        "es": "Fachada 1"
+      },
+      "description": {
+        "en": "Leave the orientation empty to ignore a facade. Orientation: degrees from the north, clockwise (90 = east, 180 = south, 270 = west), or N, NE, E, SE, S, SW, W, NW.",
+        "fr": "Laissez l'orientation vide pour ignorer une façade. Orientation : degrés depuis le nord, sens horaire (90 = est, 180 = sud, 270 = ouest), ou N, NE, E, SE, S, SO, O, NO.",
+        "de": "Lass die Ausrichtung leer, um eine Fassade zu ignorieren. Ausrichtung: Grad ab Norden im Uhrzeigersinn (90 = Ost, 180 = Süd, 270 = West) oder N, NE, E, SE, S, SW, W, NW.",
+        "es": "Deje la orientación vacía para ignorar una fachada. Orientación: grados desde el norte, en sentido horario (90 = este, 180 = sur, 270 = oeste), o N, NE, E, SE, S, SO, O, NO."
+      }
+    },
+    {
+      "key": "facade_1_orientation",
+      "type": "string",
+      "label": {
+        "en": "Orientation",
+        "fr": "Orientation",
+        "de": "Ausrichtung",
+        "es": "Orientación"
+      },
+      "placeholder": {
+        "en": "e.g. 180 or S",
+        "fr": "ex. 180 ou S",
+        "de": "z. B. 180 oder S",
+        "es": "p. ej. 180 o S"
+      },
+      "required": false,
+      "default": "S"
+    },
+    {
+      "key": "facade_1_name",
+      "type": "string",
+      "label": {
+        "en": "Name (optional)",
+        "fr": "Nom (facultatif)",
+        "de": "Name (optional)",
+        "es": "Nombre (opcional)"
+      },
+      "placeholder": {
+        "en": "e.g. Living room",
+        "fr": "ex. Salon",
+        "de": "z. B. Wohnzimmer",
+        "es": "p. ej. Salón"
+      },
+      "required": false
+    },
+    {
+      "key": "facade_1_aperture",
+      "type": "number",
+      "label": {
+        "en": "Field of view (°)",
+        "fr": "Champ de vue (°)",
+        "de": "Sichtfeld (°)",
+        "es": "Campo de visión (°)"
+      },
+      "description": {
+        "en": "Width of sky seen by the windows: 180 for a flat wall, less for deep window recesses or side walls.",
+        "fr": "Largeur de ciel vue par les fenêtres : 180 pour un mur plat, moins pour des embrasures profondes ou des murs en retour.",
+        "de": "Breite des Himmels, den die Fenster sehen: 180 für eine flache Wand, weniger bei tiefen Fensterlaibungen oder Seitenwänden.",
+        "es": "Anchura de cielo vista por las ventanas: 180 para un muro plano, menos para huecos profundos o muros laterales."
+      },
+      "required": false,
+      "default": 180,
+      "min": 10,
+      "max": 180
+    },
+    {
+      "key": "facade_1_horizon",
+      "type": "number",
+      "label": {
+        "en": "Horizon mask (°)",
+        "fr": "Masque d'horizon (°)",
+        "de": "Horizontmaske (°)",
+        "es": "Máscara de horizonte (°)"
+      },
+      "description": {
+        "en": "Sun elevation hidden by a hill, a building or a balcony in front of this facade, 0 if clear.",
+        "fr": "Élévation du soleil cachée par une colline, un immeuble ou un balcon devant cette façade, 0 si dégagé.",
+        "de": "Sonnenhöhe, die ein Hügel, ein Gebäude oder ein Balkon vor dieser Fassade verdeckt, 0 wenn frei.",
+        "es": "Elevación del sol oculta por una colina, un edificio o un balcón frente a esta fachada, 0 si está despejado."
+      },
+      "required": false,
+      "default": 0,
+      "min": 0,
+      "max": 80
+    },
+    {
+      "key": "facade_2",
+      "type": "section",
+      "label": {
+        "en": "Facade 2",
+        "fr": "Façade 2",
+        "de": "Fassade 2",
+        "es": "Fachada 2"
+      }
+    },
+    {
+      "key": "facade_2_orientation",
+      "type": "string",
+      "label": {
+        "en": "Orientation",
+        "fr": "Orientation",
+        "de": "Ausrichtung",
+        "es": "Orientación"
+      },
+      "placeholder": {
+        "en": "e.g. 180 or S",
+        "fr": "ex. 180 ou S",
+        "de": "z. B. 180 oder S",
+        "es": "p. ej. 180 o S"
+      },
+      "required": false
+    },
+    {
+      "key": "facade_2_name",
+      "type": "string",
+      "label": {
+        "en": "Name (optional)",
+        "fr": "Nom (facultatif)",
+        "de": "Name (optional)",
+        "es": "Nombre (opcional)"
+      },
+      "placeholder": {
+        "en": "e.g. Living room",
+        "fr": "ex. Salon",
+        "de": "z. B. Wohnzimmer",
+        "es": "p. ej. Salón"
+      },
+      "required": false
+    },
+    {
+      "key": "facade_2_aperture",
+      "type": "number",
+      "label": {
+        "en": "Field of view (°)",
+        "fr": "Champ de vue (°)",
+        "de": "Sichtfeld (°)",
+        "es": "Campo de visión (°)"
+      },
+      "required": false,
+      "default": 180,
+      "min": 10,
+      "max": 180
+    },
+    {
+      "key": "facade_2_horizon",
+      "type": "number",
+      "label": {
+        "en": "Horizon mask (°)",
+        "fr": "Masque d'horizon (°)",
+        "de": "Horizontmaske (°)",
+        "es": "Máscara de horizonte (°)"
+      },
+      "required": false,
+      "default": 0,
+      "min": 0,
+      "max": 80
+    },
+    {
+      "key": "facade_3",
+      "type": "section",
+      "label": {
+        "en": "Facade 3",
+        "fr": "Façade 3",
+        "de": "Fassade 3",
+        "es": "Fachada 3"
+      }
+    },
+    {
+      "key": "facade_3_orientation",
+      "type": "string",
+      "label": {
+        "en": "Orientation",
+        "fr": "Orientation",
+        "de": "Ausrichtung",
+        "es": "Orientación"
+      },
+      "placeholder": {
+        "en": "e.g. 180 or S",
+        "fr": "ex. 180 ou S",
+        "de": "z. B. 180 oder S",
+        "es": "p. ej. 180 o S"
+      },
+      "required": false
+    },
+    {
+      "key": "facade_3_name",
+      "type": "string",
+      "label": {
+        "en": "Name (optional)",
+        "fr": "Nom (facultatif)",
+        "de": "Name (optional)",
+        "es": "Nombre (opcional)"
+      },
+      "placeholder": {
+        "en": "e.g. Living room",
+        "fr": "ex. Salon",
+        "de": "z. B. Wohnzimmer",
+        "es": "p. ej. Salón"
+      },
+      "required": false
+    },
+    {
+      "key": "facade_3_aperture",
+      "type": "number",
+      "label": {
+        "en": "Field of view (°)",
+        "fr": "Champ de vue (°)",
+        "de": "Sichtfeld (°)",
+        "es": "Campo de visión (°)"
+      },
+      "required": false,
+      "default": 180,
+      "min": 10,
+      "max": 180
+    },
+    {
+      "key": "facade_3_horizon",
+      "type": "number",
+      "label": {
+        "en": "Horizon mask (°)",
+        "fr": "Masque d'horizon (°)",
+        "de": "Horizontmaske (°)",
+        "es": "Máscara de horizonte (°)"
+      },
+      "required": false,
+      "default": 0,
+      "min": 0,
+      "max": 80
+    },
+    {
+      "key": "facade_4",
+      "type": "section",
+      "label": {
+        "en": "Facade 4",
+        "fr": "Façade 4",
+        "de": "Fassade 4",
+        "es": "Fachada 4"
+      }
+    },
+    {
+      "key": "facade_4_orientation",
+      "type": "string",
+      "label": {
+        "en": "Orientation",
+        "fr": "Orientation",
+        "de": "Ausrichtung",
+        "es": "Orientación"
+      },
+      "placeholder": {
+        "en": "e.g. 180 or S",
+        "fr": "ex. 180 ou S",
+        "de": "z. B. 180 oder S",
+        "es": "p. ej. 180 o S"
+      },
+      "required": false
+    },
+    {
+      "key": "facade_4_name",
+      "type": "string",
+      "label": {
+        "en": "Name (optional)",
+        "fr": "Nom (facultatif)",
+        "de": "Name (optional)",
+        "es": "Nombre (opcional)"
+      },
+      "placeholder": {
+        "en": "e.g. Living room",
+        "fr": "ex. Salon",
+        "de": "z. B. Wohnzimmer",
+        "es": "p. ej. Salón"
+      },
+      "required": false
+    },
+    {
+      "key": "facade_4_aperture",
+      "type": "number",
+      "label": {
+        "en": "Field of view (°)",
+        "fr": "Champ de vue (°)",
+        "de": "Sichtfeld (°)",
+        "es": "Campo de visión (°)"
+      },
+      "required": false,
+      "default": 180,
+      "min": 10,
+      "max": 180
+    },
+    {
+      "key": "facade_4_horizon",
+      "type": "number",
+      "label": {
+        "en": "Horizon mask (°)",
+        "fr": "Masque d'horizon (°)",
+        "de": "Horizontmaske (°)",
+        "es": "Máscara de horizonte (°)"
+      },
+      "required": false,
+      "default": 0,
+      "min": 0,
+      "max": 80
+    },
+    {
+      "key": "facade_5",
+      "type": "section",
+      "label": {
+        "en": "Facade 5",
+        "fr": "Façade 5",
+        "de": "Fassade 5",
+        "es": "Fachada 5"
+      }
+    },
+    {
+      "key": "facade_5_orientation",
+      "type": "string",
+      "label": {
+        "en": "Orientation",
+        "fr": "Orientation",
+        "de": "Ausrichtung",
+        "es": "Orientación"
+      },
+      "placeholder": {
+        "en": "e.g. 180 or S",
+        "fr": "ex. 180 ou S",
+        "de": "z. B. 180 oder S",
+        "es": "p. ej. 180 o S"
+      },
+      "required": false
+    },
+    {
+      "key": "facade_5_name",
+      "type": "string",
+      "label": {
+        "en": "Name (optional)",
+        "fr": "Nom (facultatif)",
+        "de": "Name (optional)",
+        "es": "Nombre (opcional)"
+      },
+      "placeholder": {
+        "en": "e.g. Living room",
+        "fr": "ex. Salon",
+        "de": "z. B. Wohnzimmer",
+        "es": "p. ej. Salón"
+      },
+      "required": false
+    },
+    {
+      "key": "facade_5_aperture",
+      "type": "number",
+      "label": {
+        "en": "Field of view (°)",
+        "fr": "Champ de vue (°)",
+        "de": "Sichtfeld (°)",
+        "es": "Campo de visión (°)"
+      },
+      "required": false,
+      "default": 180,
+      "min": 10,
+      "max": 180
+    },
+    {
+      "key": "facade_5_horizon",
+      "type": "number",
+      "label": {
+        "en": "Horizon mask (°)",
+        "fr": "Masque d'horizon (°)",
+        "de": "Horizontmaske (°)",
+        "es": "Máscara de horizonte (°)"
+      },
+      "required": false,
+      "default": 0,
+      "min": 0,
+      "max": 80
+    },
+    {
+      "key": "facade_6",
+      "type": "section",
+      "label": {
+        "en": "Facade 6",
+        "fr": "Façade 6",
+        "de": "Fassade 6",
+        "es": "Fachada 6"
+      }
+    },
+    {
+      "key": "facade_6_orientation",
+      "type": "string",
+      "label": {
+        "en": "Orientation",
+        "fr": "Orientation",
+        "de": "Ausrichtung",
+        "es": "Orientación"
+      },
+      "placeholder": {
+        "en": "e.g. 180 or S",
+        "fr": "ex. 180 ou S",
+        "de": "z. B. 180 oder S",
+        "es": "p. ej. 180 o S"
+      },
+      "required": false
+    },
+    {
+      "key": "facade_6_name",
+      "type": "string",
+      "label": {
+        "en": "Name (optional)",
+        "fr": "Nom (facultatif)",
+        "de": "Name (optional)",
+        "es": "Nombre (opcional)"
+      },
+      "placeholder": {
+        "en": "e.g. Living room",
+        "fr": "ex. Salon",
+        "de": "z. B. Wohnzimmer",
+        "es": "p. ej. Salón"
+      },
+      "required": false
+    },
+    {
+      "key": "facade_6_aperture",
+      "type": "number",
+      "label": {
+        "en": "Field of view (°)",
+        "fr": "Champ de vue (°)",
+        "de": "Sichtfeld (°)",
+        "es": "Campo de visión (°)"
+      },
+      "required": false,
+      "default": 180,
+      "min": 10,
+      "max": 180
+    },
+    {
+      "key": "facade_6_horizon",
+      "type": "number",
+      "label": {
+        "en": "Horizon mask (°)",
+        "fr": "Masque d'horizon (°)",
+        "de": "Horizontmaske (°)",
+        "es": "Máscara de horizonte (°)"
+      },
+      "required": false,
+      "default": 0,
+      "min": 0,
+      "max": 80
     }
   ],
   "actions": [
     {
-      "key": "test_weather",
-      "label": { "en": "Test the weather provider", "fr": "Tester le fournisseur météo" },
-      "timeout_seconds": 30
-    },
-    {
-      "key": "identify",
-      "label": { "en": "Identify a device", "fr": "Identifier un appareil" },
-      "fields": [
-        {
-          "key": "device",
-          "type": "select",
-          "source": "devices",
-          "label": { "en": "Device", "fr": "Appareil" },
-          "required": true
-        }
-      ]
+      "key": "preview",
+      "label": {
+        "en": "Show the advice now",
+        "fr": "Voir le conseil maintenant",
+        "de": "Empfehlung jetzt anzeigen",
+        "es": "Ver el consejo ahora"
+      },
+      "timeout_seconds": 15
     }
   ],
   "scene_triggers": [
     {
-      "key": "motion_detected",
-      "label": { "en": "Motion detected", "fr": "Mouvement détecté" },
+      "key": "sun_arrival",
+      "label": {
+        "en": "Sun reaches a facade",
+        "fr": "Le soleil arrive sur une façade",
+        "de": "Sonne erreicht eine Fassade",
+        "es": "El sol llega a una fachada"
+      },
       "description": {
-        "en": "A demo motion sensor saw a person or an animal move.",
-        "fr": "Un détecteur de démonstration a vu bouger une personne ou un animal."
+        "en": "The sun will shine on the facade in the chosen number of minutes (0 = now). Use it to lower the shutters in time.",
+        "fr": "Le soleil touchera la façade dans le nombre de minutes choisi (0 = maintenant). Pour baisser les volets à temps.",
+        "de": "Die Sonne trifft die Fassade in der gewählten Anzahl Minuten (0 = jetzt). Damit senkst du die Rollläden rechtzeitig.",
+        "es": "El sol llegará a la fachada en el número de minutos elegido (0 = ahora). Para bajar las persianas a tiempo."
       },
       "fields": [
         {
           "key": "device",
           "type": "select",
           "source": "devices",
-          "label": { "en": "Sensor", "fr": "Détecteur" }
+          "label": {
+            "en": "Facade",
+            "fr": "Façade",
+            "de": "Fassade",
+            "es": "Fachada"
+          }
         },
         {
-          "key": "target",
-          "type": "multi_select",
-          "label": { "en": "What moved", "fr": "Ce qui a bougé" },
+          "key": "lead",
+          "type": "select",
+          "label": {
+            "en": "When",
+            "fr": "Quand",
+            "de": "Wann",
+            "es": "Cuándo"
+          },
+          "required": true,
           "options": [
-            { "value": "person", "label": { "en": "Person", "fr": "Personne" } },
-            { "value": "animal", "label": { "en": "Animal", "fr": "Animal" } }
+            {
+              "value": "0",
+              "label": {
+                "en": "On arrival",
+                "fr": "À l'arrivée",
+                "de": "Bei Ankunft",
+                "es": "A la llegada"
+              }
+            },
+            {
+              "value": "15",
+              "label": {
+                "en": "15 min before",
+                "fr": "15 min avant",
+                "de": "15 Min. vorher",
+                "es": "15 min antes"
+              }
+            },
+            {
+              "value": "30",
+              "label": {
+                "en": "30 min before",
+                "fr": "30 min avant",
+                "de": "30 Min. vorher",
+                "es": "30 min antes"
+              }
+            },
+            {
+              "value": "60",
+              "label": {
+                "en": "1 hour before",
+                "fr": "1 heure avant",
+                "de": "1 Stunde vorher",
+                "es": "1 hora antes"
+              }
+            }
           ]
         }
       ],
       "variables": [
         {
-          "key": "target",
+          "key": "facade",
           "type": "string",
-          "label": { "en": "What moved", "fr": "Ce qui a bougé" }
+          "label": {
+            "en": "Facade",
+            "fr": "Façade",
+            "de": "Fassade",
+            "es": "Fachada"
+          }
+        },
+        {
+          "key": "arrival_time",
+          "type": "string",
+          "label": {
+            "en": "Arrival time",
+            "fr": "Heure d'arrivée",
+            "de": "Ankunftszeit",
+            "es": "Hora de llegada"
+          }
+        },
+        {
+          "key": "minutes_before",
+          "type": "number",
+          "label": {
+            "en": "Minutes before arrival",
+            "fr": "Minutes avant l'arrivée",
+            "de": "Minuten vor Ankunft",
+            "es": "Minutos antes de la llegada"
+          }
+        },
+        {
+          "key": "max_closure",
+          "type": "number",
+          "label": {
+            "en": "Highest advised closure (%)",
+            "fr": "Fermeture conseillée maximale (%)",
+            "de": "Höchste empfohlene Schließung (%)",
+            "es": "Cierre aconsejado máximo (%)"
+          }
+        },
+        {
+          "key": "season",
+          "type": "string",
+          "label": {
+            "en": "Season (summer or winter)",
+            "fr": "Saison (summer ou winter)",
+            "de": "Jahreszeit (summer oder winter)",
+            "es": "Estación (summer o winter)"
+          }
         }
       ]
     }
   ],
   "scene_actions": [
     {
-      "key": "identify_device",
-      "label": { "en": "Identify a device", "fr": "Identifier un appareil" },
+      "key": "set_season",
+      "label": {
+        "en": "Force the season",
+        "fr": "Imposer la saison",
+        "de": "Jahreszeit erzwingen",
+        "es": "Imponer la estación"
+      },
       "description": {
-        "en": "Make a device signal itself (the demo light blinks).",
-        "fr": "Fait se signaler un appareil (la lampe de démonstration clignote)."
+        "en": "Switch the advice to summer or winter, e.g. from your outdoor thermometer, or back to the configuration.",
+        "fr": "Passe le conseil en été ou en hiver, par exemple selon votre thermomètre extérieur, ou revient à la configuration.",
+        "de": "Stellt die Empfehlung auf Sommer oder Winter, z. B. nach deinem Außenthermometer, oder zurück auf die Konfiguration.",
+        "es": "Cambia el consejo a verano o invierno, por ejemplo según su termómetro exterior, o vuelve a la configuración."
       },
       "timeout_seconds": 15,
       "fields": [
         {
-          "key": "device",
+          "key": "season",
           "type": "select",
-          "source": "devices",
-          "label": { "en": "Device", "fr": "Appareil" },
-          "required": true
+          "label": {
+            "en": "Season",
+            "fr": "Saison",
+            "de": "Jahreszeit",
+            "es": "Estación"
+          },
+          "required": true,
+          "options": [
+            {
+              "value": "summer",
+              "label": {
+                "en": "Summer",
+                "fr": "Été",
+                "de": "Sommer",
+                "es": "Verano"
+              }
+            },
+            {
+              "value": "winter",
+              "label": {
+                "en": "Winter",
+                "fr": "Hiver",
+                "de": "Winter",
+                "es": "Invierno"
+              }
+            },
+            {
+              "value": "config",
+              "label": {
+                "en": "As configured",
+                "fr": "Selon la configuration",
+                "de": "Wie konfiguriert",
+                "es": "Según la configuración"
+              }
+            }
+          ]
         }
       ],
       "outputs": [
         {
-          "key": "signalled",
-          "type": "boolean",
-          "label": { "en": "Device signalled", "fr": "Appareil signalé" }
+          "key": "season",
+          "type": "string",
+          "label": {
+            "en": "Season in force (summer or winter)",
+            "fr": "Saison en vigueur (summer ou winter)",
+            "de": "Geltende Jahreszeit (summer oder winter)",
+            "es": "Estación vigente (summer o winter)"
+          }
         }
       ]
     }
   ],
   "widgets": [
     {
-      "key": "demo_status",
-      "label": { "en": "Demo status", "fr": "État de la démo" },
-      "description": {
-        "en": "Live temperature and plug power, plug connection and observed location.",
-        "fr": "Température et puissance en direct, connexion de la prise, position observée."
+      "key": "facades",
+      "label": {
+        "en": "Sun on the facades",
+        "fr": "Soleil sur les façades",
+        "de": "Sonne auf den Fassaden",
+        "es": "Sol en las fachadas"
       },
-      "icon": "activity",
+      "description": {
+        "en": "Advised closure of every facade, next sun times, season buttons.",
+        "fr": "Fermeture conseillée de chaque façade, prochains horaires du soleil, boutons de saison.",
+        "de": "Empfohlene Schließung jeder Fassade, nächste Sonnenzeiten, Jahreszeit-Tasten.",
+        "es": "Cierre aconsejado de cada fachada, próximas horas del sol, botones de estación."
+      },
+      "icon": "sun",
+      "settings": [
+        {
+          "key": "show_mode",
+          "type": "boolean",
+          "label": {
+            "en": "Show the season",
+            "fr": "Afficher la saison",
+            "de": "Jahreszeit anzeigen",
+            "es": "Mostrar la estación"
+          },
+          "default": true
+        },
+        {
+          "key": "show_mode_buttons",
+          "type": "boolean",
+          "label": {
+            "en": "Show the season buttons",
+            "fr": "Afficher les boutons de saison",
+            "de": "Jahreszeit-Tasten anzeigen",
+            "es": "Mostrar los botones de estación"
+          },
+          "default": true
+        }
+      ],
       "action_timeout_seconds": 15
     }
   ]

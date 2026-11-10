@@ -1,61 +1,91 @@
-# Demo Devices Template
+# Volets & Soleil — sun and shutters
 
-This is the user documentation of the integration. Gladys re-hosts this file
-and shows a permanent **Documentation** link to it in the Configuration screen
-(in the user's language, with English as the fallback) — it is when
-configuring that the user needs it most. Keep the short onboarding hints in
-the `section` blocks of the manifest `config_schema`; put the long
-step-by-step (screenshots, troubleshooting…) here.
+For each facade of your house, this integration tells whether the sun shines on it and **how much to close
+the shutters** to keep the house cool in summer, or to let the sun in during winter. Everything is computed
+locally from the position of the sun: no account, no internet access, no API.
+
+The integration never moves a shutter itself: your scenes do, with the values it publishes.
+
+_Developed without shutters connected to a test Gladys: feedback welcome on the forum._
 
 ## What you get
 
-Six demo devices show up after installation: a weather station (real data
-from Open-Meteo), a switch, a dimmable light, a smart plug with power
-metering, a motion sensor and a camera.
+One device per facade, with:
+
+- **Sun on the facade** (yes / no): the sun is above the threshold and in front of the wall;
+- **Advised closure** (0-100 %), detailed below;
+- **Direct sunlight** (0-100 %): the share of the sun's strength hitting the wall, `100 × cos θ`, whatever the
+  season;
+- **Sun incidence angle** (°): 0° when the sun faces the wall, 90° for grazing light, or when the sun is not on
+  the facade;
+- **Next sun arrival** and **Next sun departure**, in local time (`14:32`, `tomorrow 07:12`), over the next 48
+  hours.
+
+Everything is recomputed every minute; only the values that change are sent to Gladys.
+
+**The advised closure.** With θ the angle between the sun's rays and the facade, and `h` the sun elevation:
+
+`closure = 100 × cos θ × min(1, h / 15°)`, rounded to the nearest 10 %.
+
+A west facade at 7 pm in July (sun low and in front) gets 90 %; a south facade at noon (sun high, rays
+nearly parallel to the wall) gets 40 %; the second factor softens the first minutes of a low, still weak sun.
+**In winter, the advice is always 0 %**: open, to let the sun warm the house. Steps of 10 % avoid moving the
+shutters every minute.
 
 ## Configuration
 
-1. Open the **Configuration** tab of the integration.
-2. Set the **latitude** and **longitude** the demo weather station should
-   observe (they default to Paris), and pick your temperature unit.
-   The **refresh interval** sets how often the weather station and the
-   plug's power are read: every 5 minutes by default, every minute at most.
-3. Save: the devices appear in the **Discovery** tab, ready to be added.
+- **Location**: the coordinates of your house in Gladys (**Settings → Houses**). The integration asks for the
+  permission to read them when installed. Without them, it shows an error and checks again every 10 minutes.
+- **Language of names and texts**: the language of the device names and of the texts sent to Gladys.
+- **Season**: _Automatic (months)_ uses the summer months below (a range that crosses the new year works, for
+  the southern hemisphere); _Always summer_ or _Always winter_. The integration cannot read your thermometer
+  itself: to follow the outdoor temperature, use the **Force the season** scene action (see below).
+- **Minimum sun elevation**: below this height above the horizon, the sun is ignored (5° by default).
+- **Facades 1 to 6**: fill in the **orientation** of each facade, the direction its windows look at: degrees
+  from the north, clockwise (90 = east, 180 = south, 270 = west), or a compass point in English letters (N, NE,
+  E, SE, S, SW, W, NW, and NNE, ENE…). `O` is read as west (French and Spanish). An empty orientation ignores
+  the slot. Optional:
+  - **Name**: the device name (otherwise "Facade S");
+  - **Field of view**: 180° for a flat wall, less when deep window recesses or side walls hide the sun earlier;
+  - **Horizon mask**: the elevation hidden by a hill, a building or a balcony in front of the facade.
 
-The **Prefer the local connection** toggle drives the demo plug: it reports
-the channel it actually uses as a badge (local or cloud), with an orange dot
-when it runs degraded (local refused, cloud fallback).
+Tip: a map application gives the orientation of your walls; a facade facing south-south-west is about 200°.
 
 ## Actions
 
-- **Test the weather provider** — performs a live request to Open-Meteo and
-  shows the current temperature and humidity under the button.
-- **Identify a device** — pick one of your devices in the list and it will
-  signal itself (the demo light "blinks" in the logs).
+- **Show the advice now**: the season in force and the advice of every facade, to check the orientations.
 
 ## Scenes
 
-The integration adds its own cards to the scene editor (Gladys 5.1 or
-later), under the **Integrations** category:
+**Trigger "Sun reaches a facade"**: choose the facade and when: on arrival, 15 min, 30 min or 1 hour before.
+Variables: the facade, the arrival time, the minutes before arrival, the **highest advised closure** of the
+coming sunny period, and the season (`summer` or `winter`).
 
-- **Motion detected** (trigger) — starts the scene when a demo motion sensor
-  sees something move. Optionally pick the sensor and what moved (person,
-  animal); left empty, any detection matches. The following actions can
-  read what moved with `{{triggerEvent.data.target}}`.
-- **Identify a device** (action) — makes the chosen device signal itself.
-  It returns whether the device could signal itself, so the following
-  actions can depend on it.
+Examples:
+
+- _Lower the living room shutters before the sun_: trigger "Sun reaches a facade", Living room, 30 min before →
+  condition: the season variable is `summer` → set the shutter position.
+- _Close more when it gets strong_: trigger on the **Advised closure** of the facade device above 70 % → set
+  the shutter position to 30 % (in Gladys, a shutter position counts the opening).
+- _Reopen when the sun leaves_: trigger on **Sun on the facade** going to "no" → open the shutters.
+
+**Action "Force the season"**: summer, winter, or back to the configuration. For example a scene "every day at 10
+am, if the outdoor temperature is above 25 °C → Force the season: summer". The choice is kept across restarts.
+Output: the season in force.
 
 ## Dashboard
 
-Add the **Demo status** widget to a dashboard: it shows the live
-temperature of the weather station and the power of the office plug, the
-connection the plug currently uses (orange when degraded) and the observed
-location. Its **Identify the light** button makes the demo light signal
-itself.
+The **Sun on the facades** widget lists every facade with its advised closure and the next sun time, the season
+in force, and three buttons to force the season (the active one shows a check mark). Its settings hide the season
+line or the buttons.
 
-## Troubleshooting
+## Limits and troubleshooting
 
-The integration logs everything it does: check the integration logs from the
-Gladys UI (or `docker logs` on the host) with `LOG_LEVEL=debug` for the full
-detail.
+- "No house location": set the coordinates of the house in **Settings → Houses**; the first house with
+  coordinates is used.
+- "Unreadable facade orientation": fix the orientation of the slots named in the message (degrees or compass
+  points).
+- The model is geometric: no clouds, no weather. Trees and neighbours are approximated by the minimum
+  elevation and the horizon mask.
+- Times are shown in the time zone of Gladys. A sunny period shorter than 5 minutes may be missed.
+- Logs: the container logs only the lifecycle; set `LOG_LEVEL=debug` for every computation.

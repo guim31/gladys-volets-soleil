@@ -7,10 +7,12 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
-import { DEVICE_BLUEPRINTS, SCENE_TRIGGER_KEYS } from '../src/devices/index.js';
-import { SCENE_ACTIONS } from '../src/scenes.js';
-import { WIDGETS } from '../src/widgets.js';
+import { mkdtemp } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import path from 'node:path';
+import { createFakeGladys } from '@gladysassistant/integration-sdk/testing';
 import { DEFAULT_CONFIG } from '../src/config.js';
+import { createApp, TRIGGER_KEY } from '../src/app.js';
 
 const manifest = JSON.parse(
   await readFile(new URL('../gladys-assistant-integration.json', import.meta.url), 'utf8'),
@@ -29,17 +31,12 @@ const allFields = [
   ...(manifest.widgets ?? []).flatMap((widget) => widget.settings ?? []),
 ];
 
-// Actions registered outside the blueprints (see index.js).
-const REGISTRY_LEVEL_ACTIONS = ['identify'];
-
 // Manifest fields older Gladys releases reject as unknown, with the first
 // release accepting them. The store validator refuses a manifest whose
 // `gladys_version` minimum is lower: these tests catch it before a release.
 const CAPABILITY_FIELDS = ['scene_triggers', 'scene_actions', 'widgets'];
 const CAPABILITY_MIN_GLADYS_VERSION = [5, 1, 0];
 const CATEGORIES_MIN_GLADYS_VERSION = [4, 86, 0];
-
-const keysOf = (list) => (list ?? []).map((entry) => entry.key);
 
 // Minimum version of the manifest `gladys_version` range, e.g. [5, 1, 0].
 function minGladysVersion() {
@@ -57,13 +54,24 @@ function isAtLeast(version, required) {
   return true;
 }
 
-test('every manifest action has a registered handler', () => {
-  const handled = new Set([
-    ...DEVICE_BLUEPRINTS.flatMap((bp) => Object.keys(bp.actions ?? {})),
-    ...REGISTRY_LEVEL_ACTIONS,
-  ]);
+// The handlers the application registers, read from a fake Gladys: an
+// unregistered key answers with an error ack.
+async function registered() {
+  const gladys = createFakeGladys({ houses: [] });
+  const app = createApp(gladys, {
+    dataDir: await mkdtemp(path.join(tmpdir(), 'volets-')),
+    now: () => new Date('2026-07-01T10:00:00Z'),
+  });
+  await gladys.connect();
+  app.stop();
+  return gladys;
+}
+
+test('every manifest action has a registered handler', async () => {
+  const gladys = await registered();
   for (const action of manifest.actions ?? []) {
-    assert.ok(handled.has(action.key), `manifest action "${action.key}" has no handler`);
+    const ack = await gladys.fake.action(action.key, {});
+    assert.equal(ack.success, true, `manifest action "${action.key}": ${ack.error}`);
   }
 });
 
@@ -89,36 +97,23 @@ test('declaring scene triggers, scene actions or widgets requires Gladys >= 5.1.
   );
 });
 
-test('every scene_actions key has an onSceneAction handler, and vice versa', () => {
-  const declared = keysOf(manifest.scene_actions);
-  for (const key of declared) {
-    assert.equal(typeof SCENE_ACTIONS[key], 'function', `scene action "${key}" has no handler`);
+test('every scene action and widget declared has a handler', async () => {
+  const gladys = await registered();
+  for (const action of manifest.scene_actions) {
+    const ack = await gladys.fake.sceneAction(action.key, { season: 'config' });
+    assert.equal(ack.success, true, `scene action "${action.key}": ${ack.error}`);
   }
-  for (const key of Object.keys(SCENE_ACTIONS)) {
-    assert.ok(declared.includes(key), `handler "${key}" is not declared in scene_actions`);
-  }
-});
-
-test('every widgets key has an onWidgetGet handler, and vice versa', () => {
-  const declared = keysOf(manifest.widgets);
-  for (const key of declared) {
-    assert.equal(typeof WIDGETS[key]?.get, 'function', `widget "${key}" has no content handler`);
-  }
-  for (const key of Object.keys(WIDGETS)) {
-    assert.ok(declared.includes(key), `widget "${key}" is not declared in widgets`);
+  for (const widget of manifest.widgets) {
+    const ack = await gladys.fake.widgetGet(widget.key, { settings: {}, language: 'en' });
+    assert.equal(ack.success, true, `widget "${widget.key}": ${ack.error}`);
   }
 });
 
-test('every scene trigger the code fires is declared in scene_triggers, and vice versa', () => {
-  // An undeclared key is a 404 on publishSceneEvent; a declared key nobody
-  // fires is a dead card in the scene editor.
-  const declared = keysOf(manifest.scene_triggers);
-  for (const key of SCENE_TRIGGER_KEYS) {
-    assert.ok(declared.includes(key), `trigger "${key}" is fired but not declared`);
-  }
-  for (const key of declared) {
-    assert.ok(SCENE_TRIGGER_KEYS.includes(key), `trigger "${key}" is declared but never fired`);
-  }
+test('the scene trigger the code fires is the one declared', () => {
+  assert.deepEqual(
+    manifest.scene_triggers.map((trigger) => trigger.key),
+    [TRIGGER_KEY],
+  );
 });
 
 test('config_schema defaults stay consistent with DEFAULT_CONFIG', () => {

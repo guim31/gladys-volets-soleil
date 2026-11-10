@@ -1,0 +1,329 @@
+{
+  "source": "astronomy-engine 2.1.19 (Don Cross, MIT), Horizon(..., \"normal\" refraction), observer at sea level",
+  "positions": [
+    {
+      "place": "toulouse",
+      "latitude": 43.6047,
+      "longitude": 1.4442,
+      "local": "2026-03-20T07:30:00+01:00",
+      "utc": "2026-03-20T06:30:00.000Z",
+      "azimuth": 94.986,
+      "elevation": 5.176
+    },
+    {
+      "place": "toulouse",
+      "latitude": 43.6047,
+      "longitude": 1.4442,
+      "local": "2026-03-20T13:30:00+01:00",
+      "utc": "2026-03-20T12:30:00.000Z",
+      "azimuth": 190.211,
+      "elevation": 45.916
+    },
+    {
+      "place": "toulouse",
+      "latitude": 43.6047,
+      "longitude": 1.4442,
+      "local": "2026-03-20T18:00:00+01:00",
+      "utc": "2026-03-20T17:00:00.000Z",
+      "azimuth": 259.271,
+      "elevation": 11.192
+    },
+    {
+      "place": "toulouse",
+      "latitude": 43.6047,
+      "longitude": 1.4442,
+      "local": "2026-06-21T07:00:00+02:00",
+      "utc": "2026-06-21T05:00:00.000Z",
+      "azimuth": 63.646,
+      "elevation": 6.655
+    },
+    {
+      "place": "toulouse",
+      "latitude": 43.6047,
+      "longitude": 1.4442,
+      "local": "2026-06-21T14:00:00+02:00",
+      "utc": "2026-06-21T12:00:00.000Z",
+      "azimuth": 182.634,
+      "elevation": 69.822
+    },
+    {
+      "place": "toulouse",
+      "latitude": 43.6047,
+      "longitude": 1.4442,
+      "local": "2026-06-21T20:30:00+02:00",
+      "utc": "2026-06-21T18:30:00.000Z",
+      "azimuth": 292.79,
+      "elevation": 10.246
+    },
+    {
+      "place": "toulouse",
+      "latitude": 43.6047,
+      "longitude": 1.4442,
+      "local": "2026-09-23T09:00:00+02:00",
+      "utc": "2026-09-23T07:00:00.000Z",
+      "azimuth": 102.954,
+      "elevation": 13.154
+    },
+    {
+      "place": "toulouse",
+      "latitude": 43.6047,
+      "longitude": 1.4442,
+      "local": "2026-09-23T13:45:00+02:00",
+      "utc": "2026-09-23T11:45:00.000Z",
+      "azimuth": 179.423,
+      "elevation": 46.219
+    },
+    {
+      "place": "toulouse",
+      "latitude": 43.6047,
+      "longitude": 1.4442,
+      "local": "2026-09-23T19:00:00+02:00",
+      "utc": "2026-09-23T17:00:00.000Z",
+      "azimuth": 261.722,
+      "elevation": 8.308
+    },
+    {
+      "place": "toulouse",
+      "latitude": 43.6047,
+      "longitude": 1.4442,
+      "local": "2026-12-21T09:00:00+01:00",
+      "utc": "2026-12-21T08:00:00.000Z",
+      "azimuth": 128.661,
+      "elevation": 4.605
+    },
+    {
+      "place": "toulouse",
+      "latitude": 43.6047,
+      "longitude": 1.4442,
+      "local": "2026-12-21T12:45:00+01:00",
+      "utc": "2026-12-21T11:45:00.000Z",
+      "azimuth": 178.186,
+      "elevation": 22.975
+    },
+    {
+      "place": "toulouse",
+      "latitude": 43.6047,
+      "longitude": 1.4442,
+      "local": "2026-12-21T16:30:00+01:00",
+      "utc": "2026-12-21T15:30:00.000Z",
+      "azimuth": 228.665,
+      "elevation": 6.579
+    },
+    {
+      "place": "toulouse",
+      "latitude": 43.6047,
+      "longitude": 1.4442,
+      "local": "2026-03-29T01:30:00+01:00",
+      "utc": "2026-03-29T00:30:00.000Z",
+      "azimuth": 10.499,
+      "elevation": -42.235
+    },
+    {
+      "place": "toulouse",
+      "latitude": 43.6047,
+      "longitude": 1.4442,
+      "local": "2026-03-29T03:30:00+02:00",
+      "utc": "2026-03-29T01:30:00.000Z",
+      "azimuth": 29.671,
+      "elevation": -38.445
+    },
+    {
+      "place": "toulouse",
+      "latitude": 43.6047,
+      "longitude": 1.4442,
+      "local": "2026-03-29T16:00:00+02:00",
+      "utc": "2026-03-29T14:00:00.000Z",
+      "azimuth": 222.447,
+      "elevation": 41.824
+    },
+    {
+      "place": "toulouse",
+      "latitude": 43.6047,
+      "longitude": 1.4442,
+      "local": "2026-10-25T02:30:00+02:00",
+      "utc": "2026-10-25T00:30:00.000Z",
+      "azimuth": 23.338,
+      "elevation": -56.279
+    },
+    {
+      "place": "toulouse",
+      "latitude": 43.6047,
+      "longitude": 1.4442,
+      "local": "2026-10-25T02:30:00+01:00",
+      "utc": "2026-10-25T01:30:00.000Z",
+      "azimuth": 45.821,
+      "elevation": -50.044
+    },
+    {
+      "place": "toulouse",
+      "latitude": 43.6047,
+      "longitude": 1.4442,
+      "local": "2026-10-25T16:00:00+01:00",
+      "utc": "2026-10-25T15:00:00.000Z",
+      "azimuth": 232.268,
+      "elevation": 17.781
+    },
+    {
+      "place": "paris",
+      "latitude": 48.8566,
+      "longitude": 2.3522,
+      "local": "2026-03-20T07:30:00+01:00",
+      "utc": "2026-03-20T06:30:00.000Z",
+      "azimuth": 96.113,
+      "elevation": 5.291
+    },
+    {
+      "place": "paris",
+      "latitude": 48.8566,
+      "longitude": 2.3522,
+      "local": "2026-03-20T13:30:00+01:00",
+      "utc": "2026-03-20T12:30:00.000Z",
+      "azimuth": 190.558,
+      "elevation": 40.64
+    },
+    {
+      "place": "paris",
+      "latitude": 48.8566,
+      "longitude": 2.3522,
+      "local": "2026-03-20T18:00:00+01:00",
+      "utc": "2026-03-20T17:00:00.000Z",
+      "azimuth": 259.01,
+      "elevation": 9.597
+    },
+    {
+      "place": "paris",
+      "latitude": 48.8566,
+      "longitude": 2.3522,
+      "local": "2026-06-21T07:00:00+02:00",
+      "utc": "2026-06-21T05:00:00.000Z",
+      "azimuth": 64.926,
+      "elevation": 9.466
+    },
+    {
+      "place": "paris",
+      "latitude": 48.8566,
+      "longitude": 2.3522,
+      "local": "2026-06-21T14:00:00+02:00",
+      "utc": "2026-06-21T12:00:00.000Z",
+      "azimuth": 184.054,
+      "elevation": 64.544
+    },
+    {
+      "place": "paris",
+      "latitude": 48.8566,
+      "longitude": 2.3522,
+      "local": "2026-06-21T20:30:00+02:00",
+      "utc": "2026-06-21T18:30:00.000Z",
+      "azimuth": 292.467,
+      "elevation": 11.678
+    },
+    {
+      "place": "paris",
+      "latitude": 48.8566,
+      "longitude": 2.3522,
+      "local": "2026-09-23T09:00:00+02:00",
+      "utc": "2026-09-23T07:00:00.000Z",
+      "azimuth": 104.8,
+      "elevation": 12.507
+    },
+    {
+      "place": "paris",
+      "latitude": 48.8566,
+      "longitude": 2.3522,
+      "local": "2026-09-23T13:45:00+02:00",
+      "utc": "2026-09-23T11:45:00.000Z",
+      "azimuth": 180.673,
+      "elevation": 40.97
+    },
+    {
+      "place": "paris",
+      "latitude": 48.8566,
+      "longitude": 2.3522,
+      "local": "2026-09-23T19:00:00+02:00",
+      "utc": "2026-09-23T17:00:00.000Z",
+      "azimuth": 261.705,
+      "elevation": 6.947
+    },
+    {
+      "place": "paris",
+      "latitude": 48.8566,
+      "longitude": 2.3522,
+      "local": "2026-12-21T09:00:00+01:00",
+      "utc": "2026-12-21T08:00:00.000Z",
+      "azimuth": 129.553,
+      "elevation": 1.912
+    },
+    {
+      "place": "paris",
+      "latitude": 48.8566,
+      "longitude": 2.3522,
+      "local": "2026-12-21T12:45:00+01:00",
+      "utc": "2026-12-21T11:45:00.000Z",
+      "azimuth": 179.121,
+      "elevation": 17.751
+    },
+    {
+      "place": "paris",
+      "latitude": 48.8566,
+      "longitude": 2.3522,
+      "local": "2026-12-21T16:30:00+01:00",
+      "utc": "2026-12-21T15:30:00.000Z",
+      "azimuth": 229.044,
+      "elevation": 2.769
+    },
+    {
+      "place": "paris",
+      "latitude": 48.8566,
+      "longitude": 2.3522,
+      "local": "2026-03-29T01:30:00+01:00",
+      "utc": "2026-03-29T00:30:00.000Z",
+      "azimuth": 10.858,
+      "elevation": -36.92
+    },
+    {
+      "place": "paris",
+      "latitude": 48.8566,
+      "longitude": 2.3522,
+      "local": "2026-03-29T03:30:00+02:00",
+      "utc": "2026-03-29T01:30:00.000Z",
+      "azimuth": 28.839,
+      "elevation": -33.52
+    },
+    {
+      "place": "paris",
+      "latitude": 48.8566,
+      "longitude": 2.3522,
+      "local": "2026-03-29T16:00:00+02:00",
+      "utc": "2026-03-29T14:00:00.000Z",
+      "azimuth": 220.607,
+      "elevation": 37.476
+    },
+    {
+      "place": "paris",
+      "latitude": 48.8566,
+      "longitude": 2.3522,
+      "local": "2026-10-25T02:30:00+02:00",
+      "utc": "2026-10-25T00:30:00.000Z",
+      "azimuth": 22.006,
+      "elevation": -51.153
+    },
+    {
+      "place": "paris",
+      "latitude": 48.8566,
+      "longitude": 2.3522,
+      "local": "2026-10-25T02:30:00+01:00",
+      "utc": "2026-10-25T01:30:00.000Z",
+      "azimuth": 42.867,
+      "elevation": -45.815
+    },
+    {
+      "place": "paris",
+      "latitude": 48.8566,
+      "longitude": 2.3522,
+      "local": "2026-10-25T16:00:00+01:00",
+      "utc": "2026-10-25T15:00:00.000Z",
+      "azimuth": 231.856,
+      "elevation": 14.069
+    }
+  ]
+}
