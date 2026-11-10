@@ -19,6 +19,8 @@ export const LEADS = [0, 15, 30, 60];
 // An arrival trigger is still fired when the loop wakes up to 3 minutes late.
 const FIRE_WINDOW_MS = 3 * 60000;
 const LOCATION_RETRY_MS = 10 * 60000;
+// A located house is read again every hour: its coordinates may be corrected.
+const LOCATION_REFRESH_MS = 60 * 60000;
 const HEARTBEAT_MS = 6 * 3600 * 1000;
 
 export function createApp(
@@ -34,20 +36,54 @@ export function createApp(
   const timelines = new Map(); // slot -> timeline of the last tick
   let season = null;
 
+  // A failure repeated every minute writes one line, then one on recovery.
+  function failureLog(what) {
+    let last = null;
+    return {
+      fail(err) {
+        if (err.message !== last) {
+          logger.warn(`${what} failed: ${err.message}`);
+        }
+        last = err.message;
+      },
+      ok() {
+        if (last !== null) {
+          logger.info(`${what} works again`);
+        }
+        last = null;
+      },
+    };
+  }
+  const housesLog = failureLog('Reading the houses');
+  const statesLog = failureLog('Publishing the states');
+  const eventsLog = failureLog('Firing the arrival trigger');
+  const computeLog = failureLog('Computing the advice');
+
   async function loadLocation() {
     lastLocationAttempt = now().getTime();
-    let houses = [];
+    let houses;
     try {
       houses = await gladys.getHouses();
+      housesLog.ok();
     } catch (err) {
-      logger.warn(`Cannot read the houses from Gladys: ${err.message}`);
+      // A transient failure keeps the location already known.
+      housesLog.fail(err);
+      if (location === null) {
+        location = false;
+        await reportStatus();
+      }
+      return;
     }
     const house = (houses ?? []).find(
       (h) => Number.isFinite(h?.latitude) && Number.isFinite(h?.longitude),
     );
     const found = house ? { latitude: house.latitude, longitude: house.longitude } : null;
     // One line when the location appears or goes missing, not one per retry.
-    if (found && !location) {
+    const moved =
+      found &&
+      location &&
+      (found.latitude !== location.latitude || found.longitude !== location.longitude);
+    if ((found && !location) || moved) {
       logger.info(`House located (${house.name ?? house.selector}), computing the advice`);
     } else if (!found && location !== false) {
       logger.info('No located house in Gladys yet, retrying every 10 minutes');
@@ -90,14 +126,13 @@ export function createApp(
    */
   async function compute({ fireEvents = true } = {}) {
     const date = now();
+    const age = date.getTime() - lastLocationAttempt;
+    if (age >= (location ? LOCATION_REFRESH_MS : LOCATION_RETRY_MS)) {
+      await loadLocation();
+    }
     if (!location) {
-      if (date.getTime() - lastLocationAttempt >= LOCATION_RETRY_MS) {
-        await loadLocation();
-      }
-      if (!location) {
-        season = null;
-        return;
-      }
+      season = null;
+      return;
     }
     season = seasonAt(config, store.override, localMonth(date));
     const created = createdIds();
@@ -119,8 +154,14 @@ export function createApp(
         events.push(...dueEvents(facade, ids.device, timeline, date));
       }
     }
+    // A failed publication must not hold back the triggers: their window is short.
     if (states.length > 0) {
-      await gladys.publishChangedStates(states, { heartbeat: HEARTBEAT_MS });
+      try {
+        await gladys.publishChangedStates(states, { heartbeat: HEARTBEAT_MS });
+        statesLog.ok();
+      } catch (err) {
+        statesLog.fail(err);
+      }
     }
     const fired = [];
     for (const { key, data } of events) {
@@ -128,8 +169,9 @@ export function createApp(
         await gladys.publishSceneEvent(TRIGGER_KEY, data);
         fired.push(key);
         logger.debug(`Trigger ${TRIGGER_KEY}: ${data.facade}, ${data.minutes_before} min before`);
+        eventsLog.ok();
       } catch (err) {
-        logger.warn(`Cannot fire ${TRIGGER_KEY} for ${data.facade}: ${err.message}`);
+        eventsLog.fail(err);
       }
     }
     if (fired.length > 0) {
@@ -166,7 +208,8 @@ export function createApp(
   function tick(options) {
     ticking = ticking
       .then(() => compute(options))
-      .catch((err) => logger.error('Computation failed', err));
+      .then(() => computeLog.ok())
+      .catch((err) => computeLog.fail(err));
     return ticking;
   }
 
@@ -222,6 +265,8 @@ export function createApp(
     logger.info('Configuration updated');
     config = normalizeConfig(raw);
     await publishDevices();
+    // The occasion to read the house again, in case its coordinates changed.
+    lastLocationAttempt = 0;
     await reportStatus();
     await tick({ fireEvents: false });
     gladys.requestWidgetRefresh(WIDGET_KEY);
@@ -238,6 +283,7 @@ export function createApp(
     const date = now();
     const lines = (lang) =>
       config.facades
+        .filter((facade) => timelines.has(facade.slot))
         .map((facade) => {
           const timeline = timelines.get(facade.slot);
           const name = facadeLabel(facade, config.language);
@@ -266,6 +312,7 @@ export function createApp(
         .filter((facade) => timelines.has(facade.slot))
         .map((facade) => ({ name: displayName(facade), timeline: timelines.get(facade.slot) })),
       season,
+      noLocation: location === false,
       override: store.override,
       now: now(),
       language,

@@ -17,7 +17,6 @@ export const DEFAULT_CONFIG = {
   summer_start_month: '5',
   summer_end_month: '9',
   min_elevation: 5,
-  facade_1_orientation: 'S',
   facade_1_aperture: 180,
   facade_1_horizon: 0,
   facade_2_aperture: 180,

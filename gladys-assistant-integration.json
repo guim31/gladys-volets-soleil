@@ -424,8 +424,7 @@
         "de": "z. B. 180 oder S",
         "es": "p. ej. 180 o S"
       },
-      "required": false,
-      "default": "S"
+      "required": false
     },
     {
       "key": "facade_1_name",

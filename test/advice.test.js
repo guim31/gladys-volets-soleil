@@ -47,11 +47,8 @@ test('a facade slot is used only with a readable orientation', () => {
     ],
   );
   assert.deepEqual(config.invalid, [3]);
-  // The default configuration has one south facade.
-  assert.deepEqual(
-    normalizeConfig().facades.map((f) => f.azimuth),
-    [180],
-  );
+  // No facade by default: an empty slot can always be cleared.
+  assert.deepEqual(normalizeConfig().facades, []);
 });
 
 test('azimuth differences wrap around the north', () => {

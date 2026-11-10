@@ -122,6 +122,7 @@ test('winter months by default: November advises 0 % everywhere', async () => {
 
 test('without a located house: a status in four languages, then a retry', async () => {
   const world = await createWorld({
+    config: { facade_1_orientation: 'S' },
     houses: [{ id: 'h', name: 'Home', selector: 'home', latitude: null, longitude: null }],
   });
   const status = world.gladys.fake.connectionStatus;
@@ -182,7 +183,7 @@ test('the widget lists the facades with the Gladys names and fits the core budge
   assert.deepEqual(
     status.items.map((i) => [i.label, i.value]),
     [
-      ['Façade S', 'soleil à demain 09:45'],
+      ['Façade S', 'prochain soleil : demain 09:45'],
       ['Living room', "90 % · jusqu'à 21:03"],
     ],
   );
@@ -215,6 +216,50 @@ test('the preview action describes every facade', async () => {
   const ack = await gladys.fake.action('preview', {});
   assert.match(
     ack.data.message.fr,
-    /^Été — Façade S \(180°\): pas de soleil, soleil à demain 09:45 · Living room \(270°\): ☀ 90 % \(24°\)$/,
+    /^Été — Façade S \(180°\): pas de soleil, prochain soleil : demain 09:45 · Living room \(270°\): ☀ 90 % \(24°\)$/,
   );
+});
+
+test('a failing publication neither blocks the triggers nor fills the logs', async (t) => {
+  const { gladys, advance, logger } = await createWorld({
+    config: TWO_FACADES,
+    at: '2026-06-21T11:50:00Z',
+  });
+  t.mock.method(gladys, 'publishChangedStates', async () => {
+    throw new Error('429 TOO_MANY_REQUESTS');
+  });
+  for (let minute = 0; minute < 10; minute += 1) {
+    await advance(1);
+  }
+  // 11:57 arrival on the west facade: fired despite the failing states.
+  assert.deepEqual(
+    gladys.fake.sceneEvents.map((e) => e.data.lead),
+    ['0'],
+  );
+  const warnings = logger.lines.filter((l) => l.level === 'warn');
+  assert.equal(warnings.length, 1, warnings.map((l) => l.message).join(' | '));
+  t.mock.restoreAll();
+  await advance(1);
+  assert.equal(logger.lines.filter((l) => /works again/.test(l.message)).length, 1);
+});
+
+test('a corrected house location is read again within the hour', async () => {
+  const world = await createWorld({
+    config: { facade_1_orientation: 'E' },
+    at: '2026-06-21T05:00:00Z',
+  });
+  const sun = facadeIds(world.gladys, 1).feature('sun');
+  assert.equal(world.gladys.fake.lastState(sun), 1);
+  // The house moves to New York: 01:00 local time, no sun.
+  world.gladys.fake.houses = [{ ...TOULOUSE, latitude: 40.7, longitude: -74 }];
+  await world.advance(30);
+  assert.equal(world.gladys.fake.lastState(sun), 1, 'not read every minute');
+  await world.advance(31);
+  assert.equal(world.gladys.fake.lastState(sun), 0);
+  // A transient failure keeps the known location.
+  world.gladys.getHouses = async () => {
+    throw new Error('ECONNRESET');
+  };
+  await world.advance(61);
+  assert.deepEqual(world.gladys.fake.connectionStatus, { connected: true });
 });

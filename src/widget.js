@@ -27,9 +27,17 @@ function rowValue(timeline, now, language) {
 /**
  * @param {{ rows: Array<{ name: string, timeline: object }>, season: string|null,
  *   override: string|null, now: Date, language: string, settings: object }} input
- *   `season` is null while the house location is unknown.
+ *   `season` is null until the first computation; `noLocation`: no located house.
  */
-export function buildWidget({ rows, season, override, now, language, settings = {} }) {
+export function buildWidget({
+  rows,
+  season,
+  noLocation = false,
+  override,
+  now,
+  language,
+  settings = {},
+}) {
   const t = pick(TEXT, language);
   const components = [];
   if (season && settings.show_mode !== false) {
@@ -40,8 +48,10 @@ export function buildWidget({ rows, season, override, now, language, settings = 
       text: override ? `${mode} (${t.forced})` : mode,
     });
   }
-  if (!season) {
+  if (noLocation) {
     components.push({ type: 'text', variant: 'body', text: pick(STATUS.noLocation, language) });
+  } else if (!season) {
+    // Not computed yet (a few seconds after the start): an empty state.
   } else if (rows.length === 0) {
     components.push({ type: 'text', variant: 'body', text: t.noFacade });
   } else {
